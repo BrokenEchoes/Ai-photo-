@@ -254,7 +254,7 @@ button:active {
 
     <textarea
       id="prompt"
-      placeholder="Example: Keep the face as close to the reference photo as possible. Create a realistic cinematic portrait with soft lighting..."
+      placeholder="Example: Keep the face as close to the reference photo as possible. Create a realistic portrait..."
     ></textarea>
 
     <div class="quick-grid">
@@ -262,23 +262,23 @@ button:active {
         📸 Natural Portrait
       </button>
 
-      <button type="button" data-prompt="Keep both people's identities and facial features as close to the reference photos as possible. Create a warm, tasteful couple portrait standing together, natural expressions, realistic photography.">
+      <button type="button" data-prompt="Keep both people's identities and facial features as close to the reference photos as possible. Create a warm, tasteful couple portrait standing together, natural expressions.">
         ❤️ Couple Portrait
       </button>
 
-      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Change the outfit to elegant traditional Indian clothing. Keep the result realistic.">
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Change the outfit to elegant traditional clothes.">
         👘 Traditional Clothes
       </button>
 
-      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Change the hairstyle naturally to suit the person. Photorealistic result.">
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Change the hairstyle naturally to suit the person.">
         💇 Hairstyle
       </button>
 
-      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Replace the background with a beautiful garden at golden hour. Realistic lighting and shadows.">
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Replace the background with a beautiful garden at golden hour.">
         🌳 New Background
       </button>
 
-      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Make the expression a gentle natural smile. Do not distort facial features.">
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Make the expression a gentle natural smile.">
         😊 Gentle Smile
       </button>
     </div>
@@ -321,13 +321,8 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 let selectedPhotos = [];
 
-galleryBtn.addEventListener("click", () => {
-  galleryInput.click();
-});
-
-cameraBtn.addEventListener("click", () => {
-  cameraInput.click();
-});
+galleryBtn.addEventListener("click", () => galleryInput.click());
+cameraBtn.addEventListener("click", () => cameraInput.click());
 
 galleryInput.addEventListener("change", () => {
   addSelectedFiles(Array.from(galleryInput.files || []));
@@ -341,8 +336,6 @@ cameraInput.addEventListener("change", () => {
 
 function addSelectedFiles(files) {
   if (files.length === 0) return;
-
-  let addedAny = false;
 
   for (const file of files) {
     if (selectedPhotos.length >= MAX_PHOTOS) {
@@ -364,12 +357,6 @@ function addSelectedFiles(files) {
       file,
       previewUrl: URL.createObjectURL(file)
     });
-
-    addedAny = true;
-  }
-
-  if (addedAny) {
-    showStatus("");
   }
 
   renderPreviews();
@@ -385,13 +372,11 @@ function renderPreviews() {
 
     const image = document.createElement("img");
     image.src = photo.previewUrl;
-    image.alt = `Selected photo ${index + 1}`;
 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.className = "remove-photo";
     removeBtn.textContent = "✕ Remove";
-    removeBtn.setAttribute("aria-label", `Remove photo ${index + 1}`);
 
     removeBtn.addEventListener("click", () => {
       URL.revokeObjectURL(photo.previewUrl);
@@ -409,17 +394,12 @@ function renderPreviews() {
   });
 }
 
+// ✅ Quick Buttons फिक्स: प्रॉम्ट मिक्स न करता थेट स्वच्छ प्रॉम्ट सेट करतो
 document.querySelectorAll("[data-prompt]").forEach(button => {
   button.addEventListener("click", () => {
-    const text = button.dataset.prompt;
-
-    if (promptInput.value.trim()) {
-      promptInput.value += ", " + text;
-    } else {
-      promptInput.value = text;
-    }
-
+    promptInput.value = button.dataset.prompt;
     promptInput.focus();
+    showStatus("");
   });
 });
 
@@ -429,7 +409,6 @@ function showStatus(message) {
     statusBox.classList.add("hidden");
     return;
   }
-
   statusBox.textContent = message;
   statusBox.classList.remove("hidden");
 }
@@ -437,33 +416,33 @@ function showStatus(message) {
 async function generateImage() {
   const prompt = promptInput.value.trim();
 
+  // 1. Validation Checks
   if (selectedPhotos.length === 0) {
-    showStatus("Please add at least one photo first.");
+    showStatus("❌ Please add at least one photo first.");
     return;
   }
 
   if (!prompt) {
-    showStatus("Please enter a prompt first.");
+    showStatus("❌ Error:\nPrompt is required.");
     promptInput.focus();
     return;
   }
 
+  // 2. FormData तयार करणे
   const formData = new FormData();
-  formData.append("prompt", prompt);
+  formData.append("prompt", prompt); // Backend साठी 'prompt' नाव पाठवत आहे
 
-  for (const photo of selectedPhotos) {
+  selectedPhotos.forEach((photo) => {
     formData.append("images", photo.file, photo.file.name);
-  }
+  });
 
   generateBtn.disabled = true;
-  generateBtn.textContent = "⏳ Generating...";
-  showStatus("Creating your AI image. Please wait.");
+  generateBtn.textContent = "⏳ Generating Image...";
+  showStatus("Creating your AI image. Please wait...");
   resultCard.classList.add("hidden");
-  resultImage.removeAttribute("src");
-  downloadLink.removeAttribute("href");
-  downloadLink.classList.add("hidden");
 
   try {
+    // 3. Backend Endpoint Call (GitHub/Vercel साठी)
     const response = await fetch("/api/generate", {
       method: "POST",
       body: formData
@@ -472,13 +451,14 @@ async function generateImage() {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(data.error || `Server error (${response.status})`);
+      throw new Error(data.error || data.message || `Server Error (${response.status})`);
     }
 
     if (!data.image) {
-      throw new Error("No image was returned by the server.");
+      throw new Error("No image data returned from server.");
     }
 
+    // 4. यशस्विरित्या इमेज दाखवणे
     resultImage.src = data.image;
     downloadLink.href = data.image;
     resultCard.classList.remove("hidden");
@@ -488,7 +468,7 @@ async function generateImage() {
     resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
 
   } catch (error) {
-    showStatus("❌ Error:\n" + (error.message || "Image generation failed."));
+    showStatus("❌ Error:\n" + (error.message || "Failed to generate image. Check your backend API."));
   } finally {
     generateBtn.disabled = false;
     generateBtn.textContent = "🚀 Generate Image";
