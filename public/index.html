@@ -158,7 +158,23 @@ Create AI images from your prompt
 <div class="card">
 
 <label>✨ Enter Your Prompt</label>
+<div class="card">
 
+<label>📷 Upload Photo</label>
+
+<input
+  type="file"
+  id="photoInput"
+  accept="image/*"
+>
+
+<img
+  id="photoPreview"
+  style="display:none;width:100%;margin-top:12px;border-radius:15px;"
+  alt="Uploaded photo"
+>
+
+</div>
 <textarea
   id="prompt"
   placeholder="Example: cinematic DSLR portrait, natural skin, soft background, realistic photography..."
