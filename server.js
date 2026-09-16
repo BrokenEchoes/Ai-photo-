@@ -10,7 +10,67 @@ app.use(express.static(path.join(__dirname, "public")));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+app.post("/api/edit", async (req, res) => {
+  try {
+    const { prompt, image } = req.body;
 
+    if (!prompt || !image) {
+      return res.status(400).json({
+        error: "Prompt and image are required."
+      });
+    }
+
+    const apiKey = process.env.POLLINATIONS_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "Pollinations API key is not configured on the server."
+      });
+    }
+
+    const editPrompt =
+      `${prompt}. Edit the provided photo while keeping the person's identity, face, and natural appearance unchanged.`;
+
+    const imageUrl =
+      "https://gen.pollinations.ai/image/" +
+      encodeURIComponent(editPrompt) +
+      "?model=flux";
+
+    const response = await fetch(imageUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      return res.status(response.status).json({
+        error: "Image editing failed: " + errorText
+      });
+    }
+
+    const contentType =
+      response.headers.get("content-type") || "image/jpeg";
+
+    const buffer = Buffer.from(
+      await response.arrayBuffer()
+    );
+
+    const editedImage =
+      `data:${contentType};base64,${buffer.toString("base64")}`;
+
+    res.json({ image: editedImage });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Server error while editing image."
+    });
+  }
+});
 app.post("/api/generate", async (req, res) => {
   try {
     const { prompt } = req.body;
