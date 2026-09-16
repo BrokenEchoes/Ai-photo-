@@ -1,12 +1,12 @@
 {
   "name": "ai-photo-studio",
   "version": "1.0.0",
-  "type": "module",
+  "description": "AI Photo Studio",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "multer": "^2.0.2"
+    "express": "^4.21.2"
   }
 }
