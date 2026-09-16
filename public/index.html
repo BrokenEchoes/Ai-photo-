@@ -3,382 +3,499 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AI Photo Studio</title>
 
 <style>
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#111;
-  color:#fff;
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #111;
+  color: #fff;
 }
 
-.container{
-  max-width:700px;
-  margin:auto;
-  padding:18px;
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 18px;
 }
 
-h1{
-  text-align:center;
-  margin:5px 0 8px;
+h1 {
+  text-align: center;
+  margin: 5px 0 8px;
 }
 
-.subtitle{
-  text-align:center;
-  color:#aaa;
-  font-size:13px;
-  margin-bottom:20px;
+.subtitle {
+  text-align: center;
+  color: #aaa;
+  font-size: 13px;
+  margin-bottom: 20px;
 }
 
-.card{
-  background:#1c1c1c;
-  padding:16px;
-  border-radius:16px;
-  margin-bottom:15px;
+.card {
+  background: #1c1c1c;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 15px;
 }
 
-label{
-  display:block;
-  margin-bottom:8px;
-  font-weight:bold;
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
 }
 
 textarea,
-button{
-  width:100%;
-  border:none;
-  border-radius:10px;
-  padding:13px;
-  font-size:15px;
+button {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 15px;
 }
 
-textarea{
-  background:#292929;
-  color:#fff;
-  outline:none;
-  min-height:130px;
-  resize:vertical;
+textarea {
+  background: #292929;
+  color: #fff;
+  outline: none;
+  min-height: 130px;
+  resize: vertical;
+  font-family: inherit;
 }
 
-.quick-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-  margin-top:10px;
+button {
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-.quick-grid button{
-  background:#333;
-  color:#fff;
-  font-size:13px;
+button:active {
+  transform: scale(.98);
 }
 
-button{
-  background:#333;
-  color:#fff;
-  cursor:pointer;
-  font-weight:bold;
+.photo-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-button:active{
-  transform:scale(.98);
+.photo-actions button {
+  background: #333;
 }
 
-.generate{
-  background:#7c3aed;
-  margin-top:15px;
-  font-size:17px;
-  padding:15px;
+.photo-count {
+  color: #aaa;
+  font-size: 13px;
+  margin: 12px 0 0;
 }
 
-.generate:disabled{
-  opacity:.5;
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
 }
 
-.status{
-  margin-top:12px;
-  padding:12px;
-  background:#252525;
-  border-radius:10px;
-  white-space:pre-wrap;
-  word-break:break-word;
-  color:#bbb;
+.preview-item {
+  min-width: 0;
+  position: relative;
+  background: #292929;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.result{
-  margin-top:15px;
+.preview-item img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  background: #080808;
 }
 
-.result img{
-  width:100%;
-  border-radius:15px;
-  display:block;
+.remove-photo {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: auto;
+  padding: 7px 10px;
+  background: #b42323;
+  border-radius: 8px;
+  font-size: 12px;
 }
 
-.download{
-  background:#176b3a;
-  margin-top:10px;
+.photo-name {
+  padding: 8px;
+  font-size: 12px;
+  color: #bbb;
+  overflow-wrap: anywhere;
 }
 
-.small{
-  font-size:12px;
-  color:#888;
-  margin-top:8px;
-  line-height:1.5;
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
 }
 
-.hidden{
-  display:none;
+.quick-grid button {
+  background: #333;
+  font-size: 13px;
 }
 
-@media(max-width:500px){
-  .quick-grid{
-    grid-template-columns:1fr 1fr;
+.generate {
+  background: #7c3aed;
+  margin-top: 15px;
+  font-size: 17px;
+  padding: 15px;
+}
+
+.generate:disabled {
+  opacity: .5;
+  cursor: wait;
+}
+
+.status {
+  margin-top: 12px;
+  padding: 12px;
+  background: #252525;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #bbb;
+}
+
+.result {
+  margin-top: 15px;
+}
+
+.result img {
+  width: 100%;
+  border-radius: 15px;
+  display: block;
+}
+
+.download {
+  background: #176b3a;
+  margin-top: 10px;
+}
+
+.small {
+  font-size: 12px;
+  color: #888;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 500px) {
+  .container {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 13px;
+  }
+
+  .preview-item img {
+    height: 170px;
   }
 }
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
-<h1>🤖 AI Photo Studio</h1>
+  <h1>🤖 AI Photo Studio</h1>
+  <div class="subtitle">Add your photo, write a prompt and generate.</div>
 
-<div class="subtitle">
-Create AI images from your prompt
-</div>
+  <div class="card">
+    <label>📷 Add Photo</label>
 
-<div class="card">
+    <div class="photo-actions">
+      <button type="button" id="galleryBtn">🖼️ Choose from Gallery</button>
+      <button type="button" id="cameraBtn">📸 Take Photo</button>
+    </div>
 
-<label>✨ Enter Your Prompt</label>
-<div class="card">
+    <input
+      type="file"
+      id="galleryInput"
+      accept="image/jpeg,image/png,image/webp"
+      multiple
+      hidden
+    >
 
-<label>📷 Upload Photo</label>
+    <input
+      type="file"
+      id="cameraInput"
+      accept="image/*"
+      capture="environment"
+      hidden
+    >
 
-<input
-  type="file"
-  id="photoInput"
-  accept="image/*"
->
+    <div id="photoCount" class="photo-count">0 of 2 photos added</div>
+    <div id="previewGrid" class="preview-grid"></div>
 
-<img
-  id="photoPreview"
-  style="display:none;width:100%;margin-top:12px;border-radius:15px;"
-  alt="Uploaded photo"
->
+    <p class="small">
+      Add up to 2 photos. Supported formats: JPG, PNG and WEBP.
+      Each photo must be 10 MB or smaller.
+    </p>
+  </div>
 
-</div>
-<textarea
-  id="prompt"
-  placeholder="Example: cinematic DSLR portrait, natural skin, soft background, realistic photography..."
-></textarea>
+  <div class="card">
+    <label for="prompt">✨ Enter Your Prompt</label>
 
-<div class="quick-grid">
+    <textarea
+      id="prompt"
+      placeholder="Example: Keep the face as close to the reference photo as possible. Create a realistic cinematic portrait with soft lighting..."
+    ></textarea>
 
-<button type="button" onclick="addPrompt('Cinematic DSLR portrait, realistic photography, natural skin, soft lighting')">
-📸 DSLR
-</button>
+    <div class="quick-grid">
+      <button type="button" data-prompt="Keep the person's face and identity as close to the reference photo as possible. Create a natural, realistic portrait with soft daylight.">
+        📸 Natural Portrait
+      </button>
 
-<button type="button" onclick="addPrompt('Luxury cinematic portrait, dramatic lighting, realistic face, professional photography')">
-🎬 Cinematic
-</button>
+      <button type="button" data-prompt="Keep both people's identities and facial features as close to the reference photos as possible. Create a warm, tasteful couple portrait standing together, natural expressions, realistic photography.">
+        ❤️ Couple Portrait
+      </button>
 
-<button type="button" onclick="addPrompt('Romantic sunset portrait, warm natural light, realistic photography')">
-❤️ Romantic
-</button>
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Change the outfit to elegant traditional Indian clothing. Keep the result realistic.">
+        👘 Traditional Clothes
+      </button>
 
-<button type="button" onclick="addPrompt('Professional studio portrait, clean background, realistic DSLR photography')">
-✨ Studio
-</button>
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Change the hairstyle naturally to suit the person. Photorealistic result.">
+        💇 Hairstyle
+      </button>
 
-</div>
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Replace the background with a beautiful garden at golden hour. Realistic lighting and shadows.">
+        🌳 New Background
+      </button>
 
-<button
-  class="generate"
-  id="generateBtn"
-  type="button"
-  onclick="generateImage()"
->
-🚀 Generate Image
-</button>
+      <button type="button" data-prompt="Keep the person's identity and face as close to the reference photo as possible. Make the expression a gentle natural smile. Do not distort facial features.">
+        😊 Gentle Smile
+      </button>
+    </div>
 
-<div id="status" class="status hidden"></div>
+    <button class="generate" id="generateBtn" type="button">
+      🚀 Generate Image
+    </button>
 
-</div>
+    <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+  </div>
 
-<div id="resultCard" class="card result hidden">
+  <div id="resultCard" class="card result hidden">
+    <label>🖼️ Generated Image</label>
+    <img id="resultImage" alt="Generated AI image">
 
-<label>🖼️ Generated Image</label>
-
-<img id="resultImage" alt="Generated AI image">
-
-<button
-  class="download"
-  type="button"
-  onclick="downloadImage()"
->
-⬇️ Save Image
-</button>
-
-</div>
+    <a id="downloadLink" class="hidden" download="ai-photo-studio.png">
+      <button class="download" type="button">⬇️ Save Image</button>
+    </a>
+  </div>
 
 </div>
 
 <script>
-const photoInput = document.getElementById("photoInput");
-const photoPreview = document.getElementById("photoPreview");
+const galleryInput = document.getElementById("galleryInput");
+const cameraInput = document.getElementById("cameraInput");
+const galleryBtn = document.getElementById("galleryBtn");
+const cameraBtn = document.getElementById("cameraBtn");
+const previewGrid = document.getElementById("previewGrid");
+const photoCount = document.getElementById("photoCount");
+const promptInput = document.getElementById("prompt");
+const generateBtn = document.getElementById("generateBtn");
+const statusBox = document.getElementById("status");
+const resultCard = document.getElementById("resultCard");
+const resultImage = document.getElementById("resultImage");
+const downloadLink = document.getElementById("downloadLink");
 
-photoInput.addEventListener("change", function(){
+const MAX_PHOTOS = 2;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-  const file = this.files[0];
+let selectedPhotos = [];
 
-  if(!file){
-    photoPreview.style.display = "none";
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = function(e){
-    photoPreview.src = e.target.result;
-    photoPreview.style.display = "block";
-  };
-
-  reader.readAsDataURL(file);
-
+galleryBtn.addEventListener("click", () => {
+  galleryInput.click();
 });
-function addPrompt(text){
 
-  const box = document.getElementById("prompt");
+cameraBtn.addEventListener("click", () => {
+  cameraInput.click();
+});
 
-  if(box.value.trim()){
-    box.value += ", " + text;
-  }else{
-    box.value = text;
-  }
+galleryInput.addEventListener("change", () => {
+  addSelectedFiles(Array.from(galleryInput.files || []));
+  galleryInput.value = "";
+});
 
-}
+cameraInput.addEventListener("change", () => {
+  addSelectedFiles(Array.from(cameraInput.files || []));
+  cameraInput.value = "";
+});
 
-async function generateImage(){
+function addSelectedFiles(files) {
+  if (files.length === 0) return;
 
-  const prompt =
-    document.getElementById("prompt").value.trim();
+  let addedAny = false;
 
-  const button =
-    document.getElementById("generateBtn");
-
-  const status =
-    document.getElementById("status");
-
-  const resultCard =
-    document.getElementById("resultCard");
-
-  const resultImage =
-    document.getElementById("resultImage");
-
-  if(!prompt){
-
-    alert("Please enter a prompt first.");
-
-    return;
-  }
-
-  button.disabled = true;
-
-  status.classList.remove("hidden");
-
-  status.textContent =
-    "⏳ Creating your AI image...\nPlease wait.";
-
-  resultCard.classList.add("hidden");
-
-  try{
-
-    const response = await fetch("/api/generate",{
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json"
-      },
-
-      body:JSON.stringify({
-        prompt:prompt
-      })
-
-    });
-
-    const data = await response.json();
-
-    if(!response.ok){
-
-      throw new Error(
-        data.error || "Image generation failed."
-      );
-
+  for (const file of files) {
+    if (selectedPhotos.length >= MAX_PHOTOS) {
+      showStatus("You can add a maximum of 2 photos.");
+      break;
     }
 
-    if(!data.image){
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showStatus("Please choose a JPG, PNG or WEBP photo.");
+      continue;
+    }
 
-      throw new Error(
-        "No image was returned by the server."
-      );
+    if (file.size > MAX_FILE_SIZE) {
+      showStatus("Each photo must be 10 MB or smaller.");
+      continue;
+    }
 
+    selectedPhotos.push({
+      file,
+      previewUrl: URL.createObjectURL(file)
+    });
+
+    addedAny = true;
+  }
+
+  if (addedAny) {
+    showStatus("");
+  }
+
+  renderPreviews();
+}
+
+function renderPreviews() {
+  previewGrid.replaceChildren();
+  photoCount.textContent = `${selectedPhotos.length} of ${MAX_PHOTOS} photos added`;
+
+  selectedPhotos.forEach((photo, index) => {
+    const item = document.createElement("div");
+    item.className = "preview-item";
+
+    const image = document.createElement("img");
+    image.src = photo.previewUrl;
+    image.alt = `Selected photo ${index + 1}`;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "remove-photo";
+    removeBtn.textContent = "✕ Remove";
+    removeBtn.setAttribute("aria-label", `Remove photo ${index + 1}`);
+
+    removeBtn.addEventListener("click", () => {
+      URL.revokeObjectURL(photo.previewUrl);
+      selectedPhotos.splice(index, 1);
+      renderPreviews();
+      showStatus("");
+    });
+
+    const name = document.createElement("div");
+    name.className = "photo-name";
+    name.textContent = photo.file.name;
+
+    item.append(image, removeBtn, name);
+    previewGrid.append(item);
+  });
+}
+
+document.querySelectorAll("[data-prompt]").forEach(button => {
+  button.addEventListener("click", () => {
+    const text = button.dataset.prompt;
+
+    if (promptInput.value.trim()) {
+      promptInput.value += ", " + text;
+    } else {
+      promptInput.value = text;
+    }
+
+    promptInput.focus();
+  });
+});
+
+function showStatus(message) {
+  if (!message) {
+    statusBox.textContent = "";
+    statusBox.classList.add("hidden");
+    return;
+  }
+
+  statusBox.textContent = message;
+  statusBox.classList.remove("hidden");
+}
+
+async function generateImage() {
+  const prompt = promptInput.value.trim();
+
+  if (selectedPhotos.length === 0) {
+    showStatus("Please add at least one photo first.");
+    return;
+  }
+
+  if (!prompt) {
+    showStatus("Please enter a prompt first.");
+    promptInput.focus();
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("prompt", prompt);
+
+  for (const photo of selectedPhotos) {
+    formData.append("images", photo.file, photo.file.name);
+  }
+
+  generateBtn.disabled = true;
+  generateBtn.textContent = "⏳ Generating...";
+  showStatus("Creating your AI image. Please wait.");
+  resultCard.classList.add("hidden");
+  resultImage.removeAttribute("src");
+  downloadLink.removeAttribute("href");
+  downloadLink.classList.add("hidden");
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || `Server error (${response.status})`);
+    }
+
+    if (!data.image) {
+      throw new Error("No image was returned by the server.");
     }
 
     resultImage.src = data.image;
-
+    downloadLink.href = data.image;
     resultCard.classList.remove("hidden");
+    downloadLink.classList.remove("hidden");
 
-    status.textContent =
-      "✅ Image generated successfully!";
+    showStatus("✅ Image generated successfully!");
+    resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  }catch(error){
-
-    status.textContent =
-      "❌ Error:\n" + error.message;
-
-  }finally{
-
-    button.disabled = false;
-
+  } catch (error) {
+    showStatus("❌ Error:\n" + (error.message || "Image generation failed."));
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.textContent = "🚀 Generate Image";
   }
-
 }
 
-function downloadImage(){
-
-  const image =
-    document.getElementById("resultImage");
-
-  if(!image.src){
-
-    return;
-  }
-
-  const link =
-    document.createElement("a");
-
-  link.href = image.src;
-
-  link.download =
-    "ai-photo-studio.png";
-
-  document.body.appendChild(link);
-
-  link.click();
-
-  document.body.removeChild(link);
-
-}
-
+generateBtn.addEventListener("click", generateImage);
 </script>
 
 </body>
