@@ -98,8 +98,7 @@ app.post(
 
       // Image-edit model that supports reference images
       form.append(
-        "model",
-        "black-forest-labs/flux.2-klein-4b"
+        "model: "google/gemini-2.5-flash-image",
       );
 
       form.append("size", "1024x1024");
