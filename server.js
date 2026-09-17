@@ -44,7 +44,16 @@ app.post(
   upload.array("images", 2),
   async (req, res) => {
     try {
-      const prompt = req.body.prompt;
+      const userPrompt = req.body.prompt;
+
+const prompt = `${userPrompt}
+
+Use the uploaded photo(s) as strict identity references.
+Keep each person's identity and facial features as close to the reference photo(s) as possible.
+Preserve facial proportions, eyes, nose, lips, jawline, skin tone, age and natural appearance.
+Do not redesign, beautify, or replace the faces.
+Only make the changes specifically requested by the user.
+Keep both people clearly recognizable as the same people from their reference photos.`;
       const files = req.files || [];
 
       if (!prompt) {
@@ -104,9 +113,6 @@ form.append(
 
 form.append("size", "1024x1024");
 form.append("n", "1");
-
-      form.append("size", "1024x1024");
-      form.append("n", "1");
       form.append("response_format", "b64_json");
 
       const response = await fetch(
